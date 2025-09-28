@@ -1,0 +1,25 @@
+---
+description: SaaS Template frontend conventions for agent tasks touching the web app.
+attachments:
+  - path: apps/web
+aliases:
+  - frontend
+---
+
+# Frontend Scope
+- Limit changes to `apps/web`; coordinate shared types through `@app/shared` exports.
+- Preserve TanStack file-based routing; add pages under `src/routes` then refresh router codegen.
+- Keep SPA-only assumptions: Vite dev server on 5173, no SSR/RSC hooks.
+
+# Implementation Guardrails
+- Use TanStack Query for async data-fetching, Zustand for client state, react-hook-form + Zod for forms.
+- Integrate auth strictly via utilities in `src/lib/stytch.ts`; never expose secrets or store tokens outside HTTP-only cookies.
+- Maintain Tiptap + ProseMirror JSON contract; bump `contentVersion` whenever persisting edits.
+- Stick to lucide-react icons, shadcn/ui primitives, and Tailwind utilities; respect existing class ordering and theming patterns.
+- For realtime features, rely on Yjs rooms named `document:{docId}`.
+
+# Quality & Tooling
+- Keep TypeScript strict mode clean; resolve type errors alongside feature work.
+- Use `pnpm --filter web` scripts for linting, type-checking, and builds when validating changes.
+- Prefer local mocks/stubs over live service calls in tests or stories.
+- Ensure components remain tree-shakeable (named exports) and compatible with Vite HMR.

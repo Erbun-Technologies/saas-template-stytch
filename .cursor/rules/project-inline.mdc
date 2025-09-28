@@ -1,0 +1,11 @@
+---
+description: Cursor inline edits should follow these global project conventions.
+alwaysApply: true
+---
+
+- Maintain pnpm workspace integrity and TypeScript strictness.
+- Keep imports absolute via configured aliases (`@`, `@saas-template/shared`); avoid noisy relative path rewrites.
+- Preserve Tailwind utility orderings and shadcn component structure.
+- Do not add alternative state managers, routers, or form libraries—extend existing TanStack/Zustand/RHF patterns.
+- Uphold Stytch auth assumptions: rely on HTTP-only cookies and bearer tokens; never surface secrets.
+- When editing shared code, ensure Zod ↔ Pydantic schemas remain in sync.

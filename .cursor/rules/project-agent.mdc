@@ -1,0 +1,37 @@
+---
+description: Core SaaS Template conventions that should always guide agent work across the repo.
+alwaysApply: true
+---
+
+# Repository Overview
+- Workspace layout stays `apps/api`, `apps/web`, `packages/shared`; keep pnpm workspaces intact.
+- Respect committed lockfiles and avoid introducing other package managers.
+- Prefer absolute paths when running tools to mirror the team's macOS + zsh environment.
+
+# Tooling & Workflow
+- Use `pnpm` for Node tasks; avoid Docker or long-lived services unless explicitly requested.
+- Follow FastAPI + Pydantic v2 conventions in `apps/api`; keep endpoints async and stateless.
+- Frontend runs on Vite + React 18 with TanStack Router/Query, Zustand, Tailwind/shadcn—do not introduce conflicting stacks or icon libraries.
+- Share types through `packages/shared`; maintain Zod ↔ Pydantic schema parity.
+- Preserve Node >= 20, Python 3.12+, and TypeScript strict mode settings.
+
+# Coding Standards
+- Handle auth through Stytch flows; never check secrets into client code and honor bearer-token assumptions.
+- Persist content as ProseMirror JSON with `contentVersion` bumps; never store raw HTML.
+- Realtime sync uses Yjs/ypy websockets with single-room naming `document:{docId}`.
+- Naming: camelCase for API payloads, snake_case within Python, TypeScript interfaces shared across layers.
+- Obey ESLint/Prettier (frontend) and Ruff (backend); do not relax lint/type baselines.
+
+# Collaboration & Safety
+- Never revert or overwrite user-local changes; pause and ask when unexpected diffs appear.
+- Ask before running migrations, seeding data, or mutating infrastructure.
+- Keep responses concise, reference files with backticks, and cite code snippets per repo norms.
+
+## Stack Reference
+- **Frontend**: Vite + React 18 SPA, TanStack Router + Query, Zustand, react-hook-form + Zod, Tiptap editor, Tailwind/shadcn UI, lucide-react icons, vite-plugin-pwa (offline-first), no SSR/RSC.
+- **Backend**: FastAPI (Python 3.12+), Pydantic v2 validation, async-only endpoints, SPA-only CORS, stateless API.
+- **Auth**: Stytch-managed; SPA → Stytch → bearer token → FastAPI, HTTP-only cookies, JWKS validation, no secrets in client.
+- **Data & Content**: ProseMirror JSON storage, `contentVersion` increments, Zod/Pydantic validation parity, Firestore DAL (swappable), no raw HTML in DB.
+- **Realtime**: Yjs client + ypy-websocket backend, rooms formatted `document:{docId}`, WebSocket transport only, one room per document.
+- **Naming & Types**: camelCase over the wire, snake_case in Python, unified TS interfaces.
+- **Tooling & Versions**: Node ≥ 20, Python ≥ 3.12, TypeScript strict, ESLint + Prettier, Ruff, pnpm with committed lockfile.

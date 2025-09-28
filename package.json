@@ -1,0 +1,20 @@
+{
+  "name": "SaaS Template",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "dev": "docker-compose up --build",
+    "dev:frontend": "pnpm --filter web dev",
+    "dev:backend": "pnpm --filter api dev",
+    "build": "pnpm -r build",
+    "type-check": "pnpm -r type-check"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.0"
+  }
+}
