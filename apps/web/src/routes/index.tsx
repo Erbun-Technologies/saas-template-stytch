@@ -4,9 +4,10 @@ import { HealthCheck } from '@saas-template/shared'
 import { useAuthStore } from '../stores/auth'
 import { Button } from '../components/ui/button'
 import { ArrowRight, BookOpen, Users, Zap } from 'lucide-react'
+import { API_BASE_URL } from '../lib/config'
 
 async function fetchHealth(): Promise<HealthCheck> {
-  const response = await fetch('http://localhost:8000/health')
+  const response = await fetch(`${API_BASE_URL}/health`)
   if (!response.ok) {
     throw new Error('Failed to fetch health status')
   }

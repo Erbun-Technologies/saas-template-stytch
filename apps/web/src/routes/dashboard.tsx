@@ -4,71 +4,28 @@ import { useAuthStore } from '../stores/auth'
 import { useEffect } from 'react'
 import { Button } from '../components/ui/button'
 import { User, Mail, CheckCircle, XCircle, Loader2 } from 'lucide-react'
-import { stytch } from '../lib/stytch'
-
-// Establish session with backend if not already done
-async function establishBackendSession(): Promise<void> {
-  // Check if we already have a session cookie by trying a simple request
-  try {
-    const testResponse = await fetch('http://localhost:8000/auth/me', {
-      credentials: 'include',
-    })
-    if (testResponse.ok) {
-      // Session already established
-      return
-    }
-  } catch (error) {
-    // Continue to establish session
-  }
-
-  // Get session token from Stytch
-  const session = stytch.session.getSync()
-  if (!session) {
-    throw new Error('Session expired - please log in again')
-  }
-
-  const tokens = stytch.session.getTokens()
-  if (!tokens || !tokens.session_token) {
-    throw new Error('Session tokens not available - please log in again')
-  }
-
-  // Establish session with backend
-  const response = await fetch('http://localhost:8000/auth/session', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify({
-      session_token: tokens.session_token,
-    }),
-  })
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error('Session establishment failed - session may have expired')
-    }
-    throw new Error(`Session establishment failed: ${response.status}`)
-  }
-}
+import { API_BASE_URL } from '../lib/config'
 
 // API call to check backend authentication
 async function checkBackendAuth(): Promise<{ user: { user_id: string; email: string; name?: string }; authenticated: boolean }> {
-  // Ensure backend session is established
-  await establishBackendSession()
-
-  const response = await fetch('http://localhost:8000/auth/me', {
+  console.log('🔍 FRONTEND: Checking backend authentication...')
+  console.log('🌐 FRONTEND: Making /auth/me request...')
+  const response = await fetch(`${API_BASE_URL}/auth/me`, {
     credentials: 'include',
   })
 
   if (!response.ok) {
+    console.error(`❌ FRONTEND: /auth/me request failed: ${response.status}`)
     if (response.status === 401) {
       throw new Error('Authentication failed - session may have expired')
     }
     throw new Error(`Backend auth failed: ${response.status}`)
   }
 
-  return response.json()
+  console.log('✅ FRONTEND: /auth/me request successful')
+  const data = await response.json()
+  console.log('👤 FRONTEND: User data received:', data.user)
+  return data
 }
 
 export const Route = createFileRoute('/dashboard')({

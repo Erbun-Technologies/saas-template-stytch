@@ -1,3 +1,6 @@
+# Notes and such
+*.note
+
 # Dependencies
 node_modules/
 .pnpm-store/
