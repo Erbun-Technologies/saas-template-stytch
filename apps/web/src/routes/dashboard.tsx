@@ -74,7 +74,6 @@ function Dashboard() {
     )
   }
 
-
   return (
     <div className="px-4 py-6 sm:px-0">
       <div className="max-w-4xl mx-auto">
@@ -86,38 +85,9 @@ function Dashboard() {
           </p>
         </div>
 
-        {/* Authentication Status Cards */}
+        {/* Backend Authentication Status */}
         <div className="grid gap-6 md:grid-cols-2 mb-6">
-          {/* Frontend Auth Status */}
-          <div className="bg-card rounded-lg border border-border p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              Frontend Authentication
-            </h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <div className="text-sm text-muted-foreground">Email</div>
-                  <div className="text-foreground font-medium">
-                    {user.emails[0]?.email || 'No email'}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <div className="text-sm text-muted-foreground">User ID</div>
-                  <div className="text-foreground font-mono text-sm">
-                    {user.user_id}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Backend Auth Status */}
-          <div className="bg-card rounded-lg border border-border p-6">
+          <div className="bg-card rounded-lg border border-border p-6 md:col-span-2">
             <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
               {backendLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
@@ -130,6 +100,7 @@ function Dashboard() {
               )}
               Backend Authentication
             </h2>
+
             {backendLoading ? (
               <div className="text-muted-foreground">Validating session with backend...</div>
             ) : backendError ? (

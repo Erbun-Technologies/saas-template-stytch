@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, Response, HTTPException, status, Request
+from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette_csrf import CSRFMiddleware
 from pydantic import BaseModel
@@ -33,28 +33,21 @@ def check_rate_limit(client_ip: str, endpoint: str) -> bool:
     rate_limit_store[key].append(now)
     return True
 
-# Import auth functionality
-from auth import (
-    create_auth_response,
-    logout,
-    get_current_user,
-    check_mfa_required,
-    start_mfa_challenge,
-    verify_mfa_code,
-    AuthResponse,
-    MFAChallengeRequest,
-    MFAVerifyRequest,
+from auth import router as auth_router
+from auth.exceptions import (
     AuthenticationError,
-    SessionNotFoundError,
     InvalidSessionError,
+    SessionNotFoundError,
     StytchError,
 )
 
 app = FastAPI(
     title="SaaS Template API",
     description="Backend API for SaaS Template",
-    version="0.1.0"
+    version="0.1.0",
 )
+
+app.include_router(auth_router)
 
 # CSRF protection middleware (must be before CORS)
 app.add_middleware(
@@ -149,55 +142,6 @@ async def get_csrf_token(request: Request):
     logger.info("🎯 ENDPOINT: /csrf-token GET request received")
     csrf_token = request.cookies.get("csrftoken")
     return {"message": "CSRF token set in cookie", "token": csrf_token}
-
-# Auth endpoints - Session establishment no longer needed
-
-@app.get("/auth/me", response_model=AuthResponse)
-async def auth_me_endpoint(current_user=Depends(get_current_user)):
-    """Get current authenticated user information"""
-    logger.info("🎯 ENDPOINT: /auth/me GET request received")
-    logger.info(f"👤 ENDPOINT: Returning user info for: {current_user.user_id}")
-    return create_auth_response(current_user)
-
-@app.post("/auth/logout")
-async def logout_endpoint(response: Response):
-    """Clear session cookies"""
-    logger.info("🎯 ENDPOINT: /auth/logout POST request received")
-    logger.info("🍪 ENDPOINT: Clearing session cookie...")
-    response.delete_cookie(key="stytch_session", path="/", samesite="lax")
-    logger.info("✅ ENDPOINT: Session cookie cleared")
-    return await logout()
-
-# MFA endpoints
-@app.post("/auth/mfa/check")
-async def check_mfa_endpoint(request: Request, current_user=Depends(get_current_user)):
-    """Check if MFA is required for current user"""
-    logger.info("🎯 ENDPOINT: /auth/mfa/check POST request received")
-    
-    mfa_required = await check_mfa_required(current_user.user_id, request)
-    
-    return {
-        "mfa_required": mfa_required,
-        "user_id": current_user.user_id
-    }
-
-@app.post("/auth/mfa/challenge")
-async def start_mfa_challenge_endpoint(request: MFAChallengeRequest):
-    """Start MFA challenge (SMS or TOTP)"""
-    logger.info("🎯 ENDPOINT: /auth/mfa/challenge POST request received")
-    logger.info(f"🔐 MFA: Starting {request.challenge_type} challenge for user {request.user_id}")
-    
-    result = await start_mfa_challenge(request)
-    return result
-
-@app.post("/auth/mfa/verify")
-async def verify_mfa_endpoint(request: MFAVerifyRequest):
-    """Verify MFA code"""
-    logger.info("🎯 ENDPOINT: /auth/mfa/verify POST request received")
-    logger.info(f"🔐 MFA: Verifying {request.challenge_type} code for user {request.user_id}")
-    
-    result = await verify_mfa_code(request)
-    return result
 
 if __name__ == "__main__":
     import uvicorn
