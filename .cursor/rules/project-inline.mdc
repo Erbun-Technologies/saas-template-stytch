@@ -4,8 +4,8 @@ alwaysApply: true
 ---
 
 - Maintain pnpm workspace integrity and TypeScript strictness.
-- Keep imports absolute via configured aliases (`@`, `@saas-template/shared`); avoid noisy relative path rewrites.
-- Preserve Tailwind utility orderings and shadcn component structure.
-- Do not add alternative state managers, routers, or form libraries—extend existing TanStack/Zustand/RHF patterns.
-- Uphold Stytch auth assumptions: rely on HTTP-only cookies and bearer tokens; never surface secrets.
-- When editing shared code, ensure Zod ↔ Pydantic schemas remain in sync.
+- Respect existing import paths; avoid mass rewrite of relative/alias imports.
+- Preserve Tailwind utility ordering and shadcn component structure.
+- Do not introduce alternative routers/state/form libs; extend TanStack/Zustand/react-hook-form.
+- Uphold Stytch auth assumptions: rely on HTTP-only cookies; never surface secrets in client code.
+- Keep DB access within repository/helpers; avoid inline engine/session in route handlers.

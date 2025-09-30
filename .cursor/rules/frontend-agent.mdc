@@ -1,5 +1,5 @@
 ---
-description: SaaS Template frontend conventions for agent tasks touching the web app.
+description: Frontend conventions for tasks touching the web app.
 attachments:
   - path: apps/web
 aliases:
@@ -7,19 +7,18 @@ aliases:
 ---
 
 # Frontend Scope
-- Limit changes to `apps/web`; coordinate shared types through `@app/shared` exports.
-- Preserve TanStack file-based routing; add pages under `src/routes` then refresh router codegen.
-- Keep SPA-only assumptions: Vite dev server on 5173, no SSR/RSC hooks.
+- Limit changes to `apps/web`; coordinate shared types via `packages/shared` if needed.
+- Preserve TanStack file-based routing; add pages under `src/routes` then regenerate routes with `pnpm --filter web run generate:routes`.
+- SPA-only: Vite dev server on 5173; no SSR/RSC.
 
 # Implementation Guardrails
-- Use TanStack Query for async data-fetching, Zustand for client state, react-hook-form + Zod for forms.
-- Integrate auth strictly via utilities in `src/lib/stytch.ts`; never expose secrets or store tokens outside HTTP-only cookies.
-- Maintain Tiptap + ProseMirror JSON contract; bump `contentVersion` whenever persisting edits.
-- Stick to lucide-react icons, shadcn/ui primitives, and Tailwind utilities; respect existing class ordering and theming patterns.
-- For realtime features, rely on Yjs rooms named `document:{docId}`.
+- Use TanStack Query for data fetching, Zustand for state, react-hook-form for forms (with Zod when needed).
+- Auth: integrate via `src/lib/stytch.ts`; do not expose secrets or manually handle tokens; rely on HTTP-only cookies.
+- UI: Tailwind + shadcn, lucide-react icons; keep class ordering and component patterns.
+- API base URL comes from `VITE_API_URL`; use `API_BASE_URL` from `src/lib/config`.
+- Do not edit `routeTree.gen.ts`; it is generated.
 
 # Quality & Tooling
-- Keep TypeScript strict mode clean; resolve type errors alongside feature work.
-- Use `pnpm --filter web` scripts for linting, type-checking, and builds when validating changes.
-- Prefer local mocks/stubs over live service calls in tests or stories.
-- Ensure components remain tree-shakeable (named exports) and compatible with Vite HMR.
+- Keep TypeScript strict; resolve type errors with feature work.
+- Use `pnpm --filter web` scripts for type-check/build; avoid ad-hoc toolchains.
+- Prefer local stubs over live service calls in examples/tests.

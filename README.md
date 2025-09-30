@@ -85,6 +85,13 @@ A production-ready SaaS application template with modern authentication, user ma
 - `make db-up`: Start only the Postgres service.
 - `make db-shell`: Open a `psql` shell to the `saas` database.
 
+### AI Assistance (Cursor)
+
+- This repo includes Cursor rules in `.cursor/rules/` to guide AI agents:
+  - `project-agent.mdc` and `project-inline.mdc`: global conventions and guardrails.
+  - `frontend-agent.mdc` / `frontend-inline.mdc`: Vite/React + TanStack patterns; do not edit `routeTree.gen.ts` (run `pnpm --filter web run generate:routes`).
+  - `backend-agent.mdc`: FastAPI + async SQLAlchemy usage; prefer `apps/api/db/crud.py` for DB access.
+
 ### Project Structure
 
 ```

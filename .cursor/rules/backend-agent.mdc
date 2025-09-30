@@ -1,0 +1,26 @@
+---
+description: Backend conventions for tasks touching the FastAPI app.
+attachments:
+  - path: apps/api
+aliases:
+  - backend
+---
+
+# Backend Scope
+- Keep endpoints async and stateless; validate sessions with Stytch in `auth/service.py`.
+- Use the DB layer in `db/`:
+  - `session.py` for engine/session and `init_db()`
+  - `models.py` for SQLAlchemy models
+  - `crud.py` for repository helpers (prefer these in routes/services)
+
+# Implementation Guardrails
+- Do not add Alembic/migrations without approval (template auto-creates tables on startup).
+- Use `DATABASE_URL` (asyncpg) and `APP_NAME` from env; keep CORS origins aligned with `web` service.
+- Error handling: raise HTTPException for user-visible errors; log unexpected exceptions.
+- Security: never log secrets or full tokens. CSRF via `CSRFMiddleware` is enabled.
+
+# Quality & Tooling
+- Python 3.12+, Pydantic v2. Keep style PEP 8 (4-space indents).
+- Keep imports minimal in `__init__` files; avoid circular deps.
+- When adding endpoints, colocate schemas under the feature (`users/schemas.py`) and mount router in `main.py`.
+

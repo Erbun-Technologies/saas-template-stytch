@@ -1,10 +1,10 @@
 ---
-description: Inline edit guardrails for SaaS Temlpate frontend files.
+description: Inline edit guardrails for SaaS Template frontend files.
 alwaysApply: false
 ---
-- Keep import aliases (`@`, `@app/shared`) intact; avoid relative-path churn.
-- Follow TanStack Router conventions: colocate loaders/actions within route files and let codegen manage types.
-- Uphold react-hook-form usage patterns; register fields via hooks and validate with Zod schemas.
-- Extend Zustand stores in `src/stores` rather than introducing new global state solutions.
-- Tailwind + shadcn styling: append utilities deliberately, avoid inline styles unless necessary.
+- Respect existing import paths; avoid mass rewrites.
+- TanStack Router: colocate logic in route files; let codegen manage types.
+- Keep react-hook-form patterns; validate with Zod when applicable.
+- Extend Zustand stores in `src/stores` rather than adding new globals.
+- Tailwind + shadcn styling: keep utility order; avoid inline styles unless necessary.
 - Ensure new UI remains tree-shakeable and Vite-HMR friendly.
