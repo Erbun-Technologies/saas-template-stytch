@@ -42,3 +42,13 @@ help:
 	@echo "  make dev-frontend - Run frontend locally (requires pnpm)"
 	@echo "  make dev-backend  - Run backend locally (requires Python 3.12+)"
 	@echo "  make help         - Show this help message"
+
+# Database helpers
+.PHONY: db-up db-shell
+db-up:
+	@echo "🗄️  Starting Postgres (detached) ..."
+	docker-compose up -d db
+
+db-shell:
+	@echo "🐘 Opening psql shell ..."
+	docker-compose exec db psql -U postgres -d saas

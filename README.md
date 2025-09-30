@@ -19,7 +19,7 @@ A production-ready SaaS application template with modern authentication, user ma
 - **Backend**: FastAPI + Python 3.12 + Pydantic v2
 - **UI**: Tailwind CSS + shadcn/ui + Lucide React icons
 - **Auth**: Stytch (with HTTP-only cookies and bearer tokens)
-- **Database**: Ready for Firestore, PostgreSQL, or your preferred database
+- **Database**: PostgreSQL in Docker (tables auto-created)
 - **Dev**: Docker Compose + pnpm workspaces + ESLint + Prettier
 
 ## Quick Start
@@ -28,11 +28,19 @@ A production-ready SaaS application template with modern authentication, user ma
    - Create a Stytch account at https://stytch.com
    - Create a new project in your Stytch dashboard
    - Copy your Project ID and Secret
-   - Create a `.env` file in the `apps/api/` directory:
+   - Create a `.env` file in the `apps/api/` directory (or copy from example):
      ```bash
      # apps/api/.env
      STYTCH_PROJECT_ID=your_project_id_here
      STYTCH_SECRET=your_secret_here
+     DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/saas
+     ```
+   - Also create a web env file (or copy from example) and set your Stytch public token:
+     ```bash
+     # apps/web/.env
+     VITE_STYTCH_PUBLIC_TOKEN=your_stytch_public_token
+     VITE_API_URL=http://localhost:8000
+     VITE_APP_NAME=SaaS Template
      ```
 
 2. **Start the development environment:**
@@ -69,6 +77,14 @@ A production-ready SaaS application template with modern authentication, user ma
    pnpm --filter web dev
    ```
 
+### Make Targets
+
+- `make dev`: Start full stack with Docker Compose.
+- `make dev-frontend`: Run frontend locally via Vite.
+- `make dev-backend`: Run backend locally with Uvicorn.
+- `make db-up`: Start only the Postgres service.
+- `make db-shell`: Open a `psql` shell to the `saas` database.
+
 ### Project Structure
 
 ```
@@ -77,6 +93,13 @@ apps/
   api/          # FastAPI backend
 packages/
   shared/       # Shared TypeScript types
+
+.env examples
+  apps/api/.env.example  # API secrets and DATABASE_URL
+  apps/web/.env.example  # VITE_API_URL and Stytch public token
+
+db (runtime)
+  PostgreSQL runs via docker-compose service `db`
 ```
 
 ## 🚀 Getting Started
@@ -98,12 +121,16 @@ pnpm install
 
 ### 2. Environment Setup
 
-Create environment files:
+Create environment files (or copy examples):
 
 ```bash
-# apps/api/.env
-STYTCH_PROJECT_ID=your_project_id_here
-STYTCH_SECRET=your_secret_here
+# API
+cp apps/api/.env.example apps/api/.env
+
+# Web
+cp apps/web/.env.example apps/web/.env
+# Optional override (defaults to Postgres service in Compose)
+# DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/saas
 ```
 
 ### 3. Start Development
@@ -116,6 +143,34 @@ docker-compose up --build
 pnpm dev:backend  # Terminal 1
 pnpm dev:frontend # Terminal 2
 ```
+
+### Database
+
+- Compose starts a Postgres `db` service with defaults:
+  - `POSTGRES_DB=saas`, `POSTGRES_USER=postgres`, `POSTGRES_PASSWORD=postgres`
+  - Connection: `postgresql+asyncpg://postgres:postgres@db:5432/saas`
+- The API creates the `users` table on startup (template-only). Use `make db-shell` to open `psql`.
+
+### Endpoints
+
+- `GET /health` – liveness check.
+- `GET /health/db` – database connectivity and user count.
+- `GET /auth/me` – authenticated session status via Stytch.
+- `GET /users/me` – current user profile from the template DB.
+
+### DBeaver (local)
+
+- Host: `localhost`, Port: `5432`, DB: `saas`, User: `postgres`, Password: `postgres`
+- URL: `postgresql://postgres:postgres@localhost:5432/saas`
+
+### CI
+
+GitHub Actions workflow runs type checks and a basic API import check on pushes and PRs.
+
+### Branding
+
+- Frontend app name: set `VITE_APP_NAME` in `apps/web/.env` to change the navbar title.
+- Backend title/description: set `APP_NAME` in `apps/api/.env` to change the FastAPI docs title.
 
 ## 📁 Project Structure
 

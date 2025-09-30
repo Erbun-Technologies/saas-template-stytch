@@ -30,6 +30,10 @@ stytch_client = stytch.Client(
 
 session_cache: Dict[str, Dict] = {}
 
+# DB layer
+from db.session import async_session
+from db.crud import get_or_create_user
+
 
 def get_session_fingerprint(request: Request) -> str:
     user_agent = request.headers.get("user-agent", "")
@@ -71,6 +75,18 @@ async def get_current_user(request: Request) -> User:
 
         logger.info(f"✅ AUTH: Successfully authenticated user: {session_data['user_id']}")
         logger.info(f"👤 AUTH: User email: {session_data['email']}")
+
+        # Persist user and update last_login in our DB template
+        try:
+            async with async_session() as session:
+                await get_or_create_user(
+                    session,
+                    stytch_user_id=session_data["user_id"],
+                    email=session_data["email"],
+                    name=session_data.get("name"),
+                )
+        except Exception as exc:  # pragma: no cover - non-fatal persistence
+            logger.error(f"DB persistence error: {exc}")
 
         return User(
             user_id=session_data["user_id"],

@@ -4,6 +4,7 @@ import { ThemeProvider } from 'next-themes'
 import { UserDropdown } from '../components/UserDropdown'
 import { useAuthStore } from '../stores/auth'
 import { Button } from '../components/ui/button'
+import { APP_NAME } from '../lib/config'
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -25,7 +26,7 @@ function RootComponent() {
             <div className="flex justify-between h-16">
               <div className="flex items-center">
                 <Link to="/" className="text-xl font-bold text-foreground">
-                  SaaS Template
+                  {APP_NAME}
                 </Link>
               </div>
               <div className="flex items-center space-x-4">

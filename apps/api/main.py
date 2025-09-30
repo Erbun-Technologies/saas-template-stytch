@@ -34,6 +34,9 @@ def check_rate_limit(client_ip: str, endpoint: str) -> bool:
     return True
 
 from auth import router as auth_router
+from db.session import init_db, async_session
+from users.routes import router as users_router
+from db.session import init_db
 from auth.exceptions import (
     AuthenticationError,
     InvalidSessionError,
@@ -41,13 +44,19 @@ from auth.exceptions import (
     StytchError,
 )
 
+APP_NAME = os.getenv("APP_NAME", "SaaS Template")
+
 app = FastAPI(
-    title="SaaS Template API",
-    description="Backend API for SaaS Template",
+    title=f"{APP_NAME} API",
+    description=f"Backend API for {APP_NAME}",
     version="0.1.0",
 )
 
 app.include_router(auth_router)
+app.include_router(users_router)
+from typing import Optional
+from sqlalchemy import select, func
+from db import models as db_models
 
 # CSRF protection middleware (must be before CORS)
 app.add_middleware(
@@ -63,7 +72,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",  # Vite dev server
         "http://127.0.0.1:5173",  # Alternative localhost
-        "http://frontend:5173",   # Docker service name
+        "http://frontend:5173",   # Legacy Docker service name
+        "http://web:5173",        # Current Docker service name
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -131,6 +141,21 @@ async def health_check():
         version="0.1.0"
     )
 
+
+@app.get("/health/db")
+async def health_db():
+    ok: bool = False
+    user_count: Optional[int] = None
+    try:
+        async with async_session() as session:
+            await session.execute(select(1))
+            ok = True
+            result = await session.execute(select(func.count(db_models.User.id)))
+            user_count = int(result.scalar() or 0)
+    except Exception:
+        ok = False
+    return {"db_connected": ok, "user_count": user_count}
+
 @app.get("/")
 async def root():
     """Root endpoint"""
@@ -146,3 +171,9 @@ async def get_csrf_token(request: Request):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+@app.on_event("startup")
+async def on_startup() -> None:
+    # Initialize database (create tables if not present)
+    await init_db()

@@ -24,8 +24,22 @@ async function checkBackendAuth(): Promise<{ user: { user_id: string; email: str
 
   console.log('✅ FRONTEND: /auth/me request successful')
   const data = await response.json()
-  console.log('👤 FRONTEND: User data received:', data.user)
+  console.log('👤 FRONTEND: User data received')
   return data
+}
+
+// API call to check database health
+async function getDbHealth(): Promise<{ db_connected: boolean; user_count: number | null }> {
+  const res = await fetch(`${API_BASE_URL}/health/db`, { credentials: 'include' })
+  if (!res.ok) throw new Error(`DB health failed: ${res.status}`)
+  return res.json()
+}
+
+// API call to get current DB user profile
+async function getDbUser(): Promise<{ id: string; email: string; name?: string | null; stytch_user_id: string; created_at: string; last_login?: string | null }> {
+  const res = await fetch(`${API_BASE_URL}/users/me`, { credentials: 'include' })
+  if (!res.ok) throw new Error(`User profile failed: ${res.status}`)
+  return res.json()
 }
 
 export const Route = createFileRoute('/dashboard')({
@@ -48,6 +62,17 @@ function Dashboard() {
       }
       return failureCount < 2
     },
+  })
+
+  const { data: dbHealth } = useQuery({
+    queryKey: ['db-health'],
+    queryFn: getDbHealth,
+  })
+
+  const { data: dbUser } = useQuery({
+    queryKey: ['db-user'],
+    queryFn: getDbUser,
+    enabled: !!backendAuth?.authenticated,
   })
 
   // Handle session expiry - redirect to login
@@ -139,6 +164,36 @@ function Dashboard() {
               </div>
             ) : (
               <div className="text-muted-foreground">Preparing session validation...</div>
+            )}
+          </div>
+          <div className="bg-card rounded-lg border border-border p-6">
+            <h2 className="text-xl font-semibold text-foreground mb-4">Database Health</h2>
+            {dbHealth ? (
+              <div className="space-y-2 text-sm">
+                <div>
+                  Status: {dbHealth.db_connected ? (
+                    <span className="text-green-600 dark:text-green-400">Connected</span>
+                  ) : (
+                    <span className="text-red-600 dark:text-red-400">Unavailable</span>
+                  )}
+                </div>
+                <div>Total Users: {dbHealth.user_count ?? '–'}</div>
+              </div>
+            ) : (
+              <div className="text-muted-foreground text-sm">Checking database…</div>
+            )}
+          </div>
+          <div className="bg-card rounded-lg border border-border p-6">
+            <h2 className="text-xl font-semibold text-foreground mb-4">Profile (DB)</h2>
+            {dbUser ? (
+              <div className="space-y-2 text-sm">
+                <div><span className="text-muted-foreground">Email:</span> {dbUser.email}</div>
+                <div><span className="text-muted-foreground">Name:</span> {dbUser.name ?? '—'}</div>
+                <div className="font-mono break-all"><span className="text-muted-foreground">ID:</span> {dbUser.id}</div>
+                <div className="font-mono break-all"><span className="text-muted-foreground">Stytch ID:</span> {dbUser.stytch_user_id}</div>
+              </div>
+            ) : (
+              <div className="text-muted-foreground text-sm">Loading profile…</div>
             )}
           </div>
         </div>
